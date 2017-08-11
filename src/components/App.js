@@ -1,12 +1,17 @@
 // This component handles the App template used on every page.
 import React, { PropTypes } from 'react';
 import Header from './common/Header';
+import LoadingSpinner from './common/LoadingSpinner';
+//import ajaxStatus from '../reducers/ajaxStatusReducer';
+import { connect } from 'react-redux';
 
 class App extends React.Component {
   render() {
+    const loadingSpinner = this.props.numAjaxCallsInProgress > 0 ? <LoadingSpinner/> : '';
+    
     return (
-      <div className="container-fluid">
-        <Header />
+      <div className="container-fluid" >
+        <Header/>&nbsp;{loadingSpinner}
         {this.props.children}
       </div>
     );
@@ -15,7 +20,14 @@ class App extends React.Component {
 
 // this is setting children as a required propType in the App Component (its passed in from react-router)
 App.propTypes = {
-  children: PropTypes.object.isRequired
+  children: PropTypes.object.isRequired,
+  numAjaxCallsInProgress: PropTypes.number
 };
 
-export default App;
+function mapStateToProps(state, ownProps) {
+  return {
+    numAjaxCallsInProgress: state.ajaxStatus // This variable name is coming from the alias in the rootReducer
+  };
+}
+
+export default connect(mapStateToProps)(App);

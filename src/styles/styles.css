@@ -9,7 +9,8 @@
 a.active {
   color: orange;
 }
-
-nav {
+/* giving this a specific name so that we override the display property on the nav tag from bootstrap */
+nav.myNav {
   padding-top: 20px;
+  display: inline;
 }

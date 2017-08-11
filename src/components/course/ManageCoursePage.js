@@ -15,6 +15,14 @@ class ManageCoursePage extends React.Component {
     };
 
     this.courseChangeHandler = this.courseChangeHandler.bind(this);
+    this.courseSaveHandler = this.courseSaveHandler.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // this method is run when react thinks props have changed
+    if (this.props.course.id !== nextProps.course.id) {
+      this.setState({course: Object.assign({}, nextProps.course)});
+    }
   }
 
   courseChangeHandler(event) {
@@ -25,43 +33,61 @@ class ManageCoursePage extends React.Component {
     return this.setState({course: course});
   }
 
+  courseSaveHandler(event) {
+    // prevent default since this is a submit handler
+    event.preventDefault();
+
+    this.props.actions.saveCourse(this.state.course);
+
+    // redirect hack to courses
+    this.context.router.push("/courses");
+  }
+
   render() {
     return(
       <CourseForm 
         course={this.state.course} 
         errors={this.state.errors} 
         allAuthors={this.props.authors}
-        onChange={this.courseChangeHandler}/>
+        onChange={this.courseChangeHandler}
+        onSave={this.courseSaveHandler}/>
     );
   }
 }
 
 ManageCoursePage.propTypes = {
   course: PropTypes.object.isRequired,
-  authors: PropTypes.array.isRequired
+  authors: PropTypes.array.isRequired,
+  actions: PropTypes.object.isRequired
 };
 
-function mapStateToProps(state, ownProps) {
-  // temp object that should come from an api later
-  let course = {
-    id: 'some-id',
-    watchHref: 'http://localhost:3000',
-    title: 'this is a course',
-    length: '2:34',
-    category: 'some category',
-    authorId: 'cory-house'
-  };
+ManageCoursePage.contextTypes = {
+  router: PropTypes.object
+};
 
-  const authorsFormattedForDropdown = state.authors.map(author => {
+function getFormattedAuthors(authors) {
+  return authors.map(author => {
     return {
       value: author.id,
       text: author.firstName + ' ' + author.lastName
     };
   });
+}
 
+function getCourseById(courses, courseId) {
+  const course = courses.filter(course => course.id === courseId);
+  // filter returns an array
+  if (course.length) {
+    return course[0];
+  } else {
+    return null;
+  }
+}
+
+function mapStateToProps(state, ownProps) {
   return {
-    course: course,
-    authors: authorsFormattedForDropdown
+    course: getCourseById(state.courses, ownProps.params.id),
+    authors: getFormattedAuthors(state.authors)
   };
 }
 
