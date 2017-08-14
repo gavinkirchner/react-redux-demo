@@ -13,6 +13,8 @@ export default function ajaxStatusReducer(state = initialState.numAjaxCallsInPro
     return state + 1;
   } else if (isSuccessfulAjaxAction(action)) {
     return state - 1;
+  } else if (action.type === types.AJAX_CALL_ERROR) {
+    return state - 1;
   }
 
   return state;

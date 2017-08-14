@@ -13,7 +13,7 @@ class CoursesPage extends React.Component {
   }
 
   redirectToManageCoursePage() {
-    browserHistory.push(`/course/${null}`);
+    browserHistory.push('/course');
   }
 
   render() {

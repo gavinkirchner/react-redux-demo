@@ -7,11 +7,9 @@ import { connect } from 'react-redux';
 
 class App extends React.Component {
   render() {
-    const loadingSpinner = this.props.numAjaxCallsInProgress > 0 ? <LoadingSpinner/> : '';
-    
     return (
       <div className="container-fluid" >
-        <Header/>&nbsp;{loadingSpinner}
+        <Header/>&nbsp;{this.props.numAjaxCallsInProgress > 0 && <LoadingSpinner/>}
         {this.props.children}
       </div>
     );

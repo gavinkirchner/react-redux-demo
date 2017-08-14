@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import * as courseActions from '../../actions/courseActions';
 import { bindActionCreators } from 'redux';
 import CourseForm from './CourseForm';
+import toastr from 'toastr';
 
 class ManageCoursePage extends React.Component {
   constructor(props, context) {
@@ -11,7 +12,8 @@ class ManageCoursePage extends React.Component {
     // initialize the internal state of the component from the prop
     this.state = {
       course: Object.assign({}, this.props.course),
-      errors: {}
+      errors: {},
+      isSaving: false
     };
 
     this.courseChangeHandler = this.courseChangeHandler.bind(this);
@@ -19,8 +21,9 @@ class ManageCoursePage extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // this method is run when react thinks props have changed
-    if (this.props.course.id !== nextProps.course.id) {
+    if (!this.props.course) {
+      this.setState({course: {}});
+    } else if (this.props.course.id !== nextProps.course.id) {
       this.setState({course: Object.assign({}, nextProps.course)});
     }
   }
@@ -36,11 +39,17 @@ class ManageCoursePage extends React.Component {
   courseSaveHandler(event) {
     // prevent default since this is a submit handler
     event.preventDefault();
+    this.setState({isSaving: true});
 
-    this.props.actions.saveCourse(this.state.course);
-
-    // redirect hack to courses
-    this.context.router.push("/courses");
+    this.props.actions.saveCourse(this.state.course)
+      .then(() => {
+        this.setState({isSaving: false});
+        toastr.success('Course Saved.');
+        this.context.router.push("/courses");
+      }).catch(error => {
+        this.setState({isSaving: false});
+        toastr.error(error);
+      });
   }
 
   render() {
@@ -50,13 +59,14 @@ class ManageCoursePage extends React.Component {
         errors={this.state.errors} 
         allAuthors={this.props.authors}
         onChange={this.courseChangeHandler}
-        onSave={this.courseSaveHandler}/>
+        onSave={this.courseSaveHandler}
+        isLoading={this.state.isSaving}/>
     );
   }
 }
 
 ManageCoursePage.propTypes = {
-  course: PropTypes.object.isRequired,
+  course: PropTypes.object,
   authors: PropTypes.array.isRequired,
   actions: PropTypes.object.isRequired
 };
