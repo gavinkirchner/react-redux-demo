@@ -5,7 +5,7 @@ import { bindActionCreators } from 'redux';
 import CourseForm from './CourseForm';
 import toastr from 'toastr';
 
-class ManageCoursePage extends React.Component {
+export class ManageCoursePage extends React.Component {
   constructor(props, context) {
     super(props, context);
 
@@ -13,7 +13,8 @@ class ManageCoursePage extends React.Component {
     this.state = {
       course: Object.assign({}, this.props.course),
       errors: {},
-      isSaving: false
+      isSaving: false, 
+      canSave: true
     };
 
     this.courseChangeHandler = this.courseChangeHandler.bind(this);
@@ -33,12 +34,19 @@ class ManageCoursePage extends React.Component {
     let course = Object.assign({}, this.state.course);
     course[field] = event.target.value;
 
-    return this.setState({course: course});
+    this.courseFormIsValid(course);
+
+    this.setState({course: course});   
   }
 
   courseSaveHandler(event) {
     // prevent default since this is a submit handler
     event.preventDefault();
+
+    if (!this.courseFormIsValid(this.state.course)) {
+      return;
+    }
+
     this.setState({isSaving: true});
 
     this.props.actions.saveCourse(this.state.course)
@@ -52,6 +60,19 @@ class ManageCoursePage extends React.Component {
       });
   }
 
+  courseFormIsValid(course) {
+    let formIsValid = true;
+    let errors = {};
+
+    if (!course.title || course.title.length < 5) {
+      errors.title = 'Title must be at least 5 characters.';
+      formIsValid = false;
+    }
+
+    this.setState({errors: errors, canSave: formIsValid});
+    return formIsValid;
+  }
+
   render() {
     return(
       <CourseForm 
@@ -60,7 +81,8 @@ class ManageCoursePage extends React.Component {
         allAuthors={this.props.authors}
         onChange={this.courseChangeHandler}
         onSave={this.courseSaveHandler}
-        isLoading={this.state.isSaving}/>
+        isLoading={this.state.isSaving}
+        canSave={this.state.canSave}/>
     );
   }
 }
@@ -90,8 +112,18 @@ function getCourseById(courses, courseId) {
   if (course.length) {
     return course[0];
   } else {
-    return null;
+    return getDefaultCourse();
   }
+}
+
+function getDefaultCourse() {
+  return {
+    title: null,
+    authorId: null,
+    category: null,
+    length: null,
+    id: null
+  };
 }
 
 function mapStateToProps(state, ownProps) {
