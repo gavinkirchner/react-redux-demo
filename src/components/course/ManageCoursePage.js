@@ -4,6 +4,8 @@ import * as courseActions from '../../actions/courseActions';
 import { bindActionCreators } from 'redux';
 import CourseForm from './CourseForm';
 import toastr from 'toastr';
+import { getCourseById } from '../../selectors/courseSelectors';
+import { getFormattedAuthors } from '../../selectors/authorSelectors';
 
 export class ManageCoursePage extends React.Component {
   constructor(props, context) {
@@ -96,35 +98,6 @@ ManageCoursePage.propTypes = {
 ManageCoursePage.contextTypes = {
   router: PropTypes.object
 };
-
-function getFormattedAuthors(authors) {
-  return authors.map(author => {
-    return {
-      value: author.id,
-      text: author.firstName + ' ' + author.lastName
-    };
-  });
-}
-
-function getCourseById(courses, courseId) {
-  const course = courses.filter(course => course.id === courseId);
-  // filter returns an array
-  if (course.length) {
-    return course[0];
-  } else {
-    return getDefaultCourse();
-  }
-}
-
-function getDefaultCourse() {
-  return {
-    title: null,
-    authorId: null,
-    category: null,
-    length: null,
-    id: null
-  };
-}
 
 function mapStateToProps(state, ownProps) {
   return {
